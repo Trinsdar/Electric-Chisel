@@ -1,0 +1,16 @@
+[
+{
+  "modid": "nanochisel",
+  "name": "Nano Chisel",
+  "description": "Adds a chisel that uses eu.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["trinsdar"],
+  "credits": "trinsdar, ic2 team for ic2, chisel team for making chisel",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": ["ic2 experimental or ic2 classic, chisel"]
+}
+]
