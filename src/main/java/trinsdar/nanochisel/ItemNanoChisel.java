@@ -64,9 +64,6 @@ public class ItemNanoChisel extends Item implements IElectricItemManager, IChise
         list.add("");
         list.add(I18n.format(base + "modes"));
         list.add(I18n.format(base + "modes.selected", TextFormatting.GREEN + I18n.format(NBTUtil.getChiselMode(stack).getUnlocName() + ".name")));
-
-
-
     }
 
     @Override
@@ -77,7 +74,7 @@ public class ItemNanoChisel extends Item implements IElectricItemManager, IChise
     @Override
     public boolean onChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
         discharge(chisel, 80, 1, false, false, false);
-        return true;
+        return false;
     }
 
     @Override
