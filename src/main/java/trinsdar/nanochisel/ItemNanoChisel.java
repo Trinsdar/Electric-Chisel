@@ -14,6 +14,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
@@ -21,6 +23,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -29,6 +32,7 @@ import team.chisel.api.IChiselGuiType;
 import team.chisel.api.IChiselItem;
 import team.chisel.api.carving.ICarvingVariation;
 import team.chisel.api.carving.IChiselMode;
+import team.chisel.common.init.ChiselTabs;
 import team.chisel.common.util.NBTUtil;
 
 import javax.annotation.Nullable;
@@ -42,13 +46,23 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
         setMaxStackSize(1);
         setRegistryName("nanochisel");
         setUnlocalizedName(NanoChisel.MODID + "." + "nanoChisel");
-        setCreativeTab(CreativeTabs.TOOLS);
+        setCreativeTab(ChiselTabs.tab);
     }
 
     @Override
     public boolean isFull3D() {
         return true;
     }
+
+
+//    @Override
+//    public void setDamage(ItemStack stack, int damage) {
+//        if (Loader.isModLoaded(classic)){
+//            ElectricItem.manager.use(stack, 100, null);
+//        }else {
+//            ElectricItem.manager.use(stack, 1000, null);
+//        }
+//    }
 
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
@@ -79,7 +93,11 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean canOpenGui(World world, EntityPlayer player, EnumHand hand) {
-        return true;
+        if (Loader.isModLoaded(classic)){
+            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 100;
+        }else {
+            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 1000;
+        }
     }
 
     @Override
@@ -101,18 +119,25 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean canChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
-        return ElectricItem.manager.getCharge(chisel) >= 80;
+        if (Loader.isModLoaded(classic)){
+            return ElectricItem.manager.getCharge(chisel) >= 100;
+        }else {
+            return ElectricItem.manager.getCharge(chisel) >= 1000;
+        }
     }
 
     @Override
     public boolean onChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
-        ElectricItem.manager.use(chisel, 1000, player);
         return false;
     }
 
     @Override
     public boolean canChiselBlock(World world, EntityPlayer player, EnumHand hand, BlockPos pos, IBlockState state) {
-        return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 80;
+        if (Loader.isModLoaded(classic)){
+            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 100;
+        }else {
+            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 1000;
+        }
     }
 
     @Override
@@ -151,7 +176,11 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public double getTransferLimit(ItemStack itemStack) {
-        return 10000;
+        if (Loader.isModLoaded(classic)){
+            return 100;
+        }else {
+            return 1000;
+        }
     }
 
     public static final ItemNanoChisel nanoChisel = new ItemNanoChisel();
