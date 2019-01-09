@@ -18,6 +18,7 @@ public class CommonProxy {
     }
 
     public void init(FMLInitializationEvent event) {
+        ItemNanoChisel.initRecipe();
     }
 
     public void postInit(FMLPostInitializationEvent event){

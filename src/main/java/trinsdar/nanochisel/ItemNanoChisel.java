@@ -1,7 +1,10 @@
 package trinsdar.nanochisel;
 
+import ic2.api.item.ElectricItem;
+import ic2.api.item.IC2Items;
 import ic2.api.item.IElectricItem;
 import ic2.api.item.IElectricItemManager;
+import ic2.api.recipe.Recipes;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
@@ -12,11 +15,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 import team.chisel.api.IChiselGuiType;
@@ -28,7 +34,8 @@ import team.chisel.common.util.NBTUtil;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemNanoChisel extends Item implements IElectricItemManager, IChiselItem {
+public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
+    public static String classic = "ic2-classic-spmod";
 
     public ItemNanoChisel() {
         super();
@@ -43,10 +50,36 @@ public class ItemNanoChisel extends Item implements IElectricItemManager, IChise
         return true;
     }
 
+    @Override
+    public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+        if (this.isInCreativeTab(tab)) {
+            ItemStack empty = new ItemStack(this, 1, 0);
+            ItemStack full = new ItemStack(this, 1, 0);
+            ElectricItem.manager.discharge(empty, 2.147483647E9D, 2147483647, true, false, false);
+            ElectricItem.manager.charge(full, 2.147483647E9D, 2147483647, true, false);
+            items.add(empty);
+            items.add(full);
+        }
+    }
+
+    @Override
+    public boolean showDurabilityBar(ItemStack stack) {
+        if (Loader.isModLoaded(classic)){
+            return true;
+        }else {
+            return ElectricItem.manager.getCharge(stack) != this.getMaxCharge(stack);
+        }
+    }
+
+    @Override
+    public double getDurabilityForDisplay(ItemStack stack)
+    {
+        return 1.0D - ElectricItem.manager.getCharge(stack) / this.getMaxCharge(stack);
+    }
 
     @Override
     public boolean canOpenGui(World world, EntityPlayer player, EnumHand hand) {
-        return getCharge(player.getHeldItem(hand)) >= 80;
+        return true;
     }
 
     @Override
@@ -68,18 +101,18 @@ public class ItemNanoChisel extends Item implements IElectricItemManager, IChise
 
     @Override
     public boolean canChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
-        return getCharge(chisel) >= 80;
+        return ElectricItem.manager.getCharge(chisel) >= 80;
     }
 
     @Override
     public boolean onChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
-        discharge(chisel, 80, 1, false, false, false);
+        ElectricItem.manager.use(chisel, 1000, player);
         return false;
     }
 
     @Override
     public boolean canChiselBlock(World world, EntityPlayer player, EnumHand hand, BlockPos pos, IBlockState state) {
-        return getCharge(player.getHeldItem(hand)) >= 80;
+        return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 80;
     }
 
     @Override
@@ -92,50 +125,33 @@ public class ItemNanoChisel extends Item implements IElectricItemManager, IChise
         return slotChanged || !ItemStack.areItemsEqual(oldStack, newStack);
     }
 
-
     @Override
-    public double charge(ItemStack itemStack, double v, int i, boolean b, boolean b1) {
-        return 100;
-    }
-
-    @Override
-    public double discharge(ItemStack itemStack, double v, int i, boolean b, boolean b1, boolean b2) {
-        return 80;
-    }
-
-    @Override
-    public double getCharge(ItemStack itemStack) {
-        return 0;
+    public boolean canProvideEnergy(ItemStack itemStack) {
+        return false;
     }
 
     @Override
     public double getMaxCharge(ItemStack itemStack) {
-        return 10000;
-    }
+        if (Loader.isModLoaded(classic)){
+            return 100000;
+        }else {
+            return 1000000;
+        }
 
-    @Override
-    public boolean canUse(ItemStack item, double v) {
-        return getCharge(item) >= 80;
-    }
-
-    @Override
-    public boolean use(ItemStack itemStack, double v, EntityLivingBase entityLivingBase) {
-        return true;
-    }
-
-    @Override
-    public void chargeFromArmor(ItemStack itemStack, EntityLivingBase entityLivingBase) {
-
-    }
-
-    @Override
-    public String getToolTip(ItemStack itemStack) {
-        return null;
     }
 
     @Override
     public int getTier(ItemStack itemStack) {
-        return 1;
+        if (Loader.isModLoaded(classic)){
+            return 2;
+        }else {
+            return 3;
+        }
+    }
+
+    @Override
+    public double getTransferLimit(ItemStack itemStack) {
+        return 10000;
     }
 
     public static final ItemNanoChisel nanoChisel = new ItemNanoChisel();
@@ -145,6 +161,10 @@ public class ItemNanoChisel extends Item implements IElectricItemManager, IChise
         IForgeRegistry<Item> registry = event.getRegistry();
         registry.register(nanoChisel);
     }
+    public static void initRecipe(){
+        Recipes.advRecipes.addRecipe(new ItemStack(nanoChisel), "  C", " C ", "E  ", 'C', IC2Items.getItem("crafting", "carbon_plate"), 'E', IC2Items.getItem("energy_crystal"));
+    }
+
     public void initModel(){
         ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
     }
