@@ -12,8 +12,8 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 
 
 version = "${mod_version}"
-group = "trinsdar.nanochisel" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "nanochisel"
+group = "trinsdar.powerchisels" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "powerchisels"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -33,7 +33,7 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 
     replace "@VERSION@", project.version
-    replaceIn "NanoChisel.java"
+    replaceIn "PowerChisels.java"
 }
 
 repositories {

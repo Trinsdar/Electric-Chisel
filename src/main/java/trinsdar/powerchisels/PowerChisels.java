@@ -1,4 +1,4 @@
-package trinsdar.nanochisel;
+package trinsdar.powerchisels;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -7,17 +7,17 @@ import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = NanoChisel.MODID, name = NanoChisel.MODNAME, version = NanoChisel.MODVERSION, dependencies = NanoChisel.DEPENDS)
-public class NanoChisel {
-    public static final String MODID = "nanochisel";
-    public static final String MODNAME = "Nano Chisel";
+@Mod(modid = PowerChisels.MODID, name = PowerChisels.MODNAME, version = PowerChisels.MODVERSION, dependencies = PowerChisels.DEPENDS)
+public class PowerChisels {
+    public static final String MODID = "powerchisels";
+    public static final String MODNAME = "Power Chisels";
     public static final String MODVERSION = "@VERSION@";
     public static final String DEPENDS = "required-after:ic2;required-after:chisel";
-    @SidedProxy(clientSide = "trinsdar.nanochisel.ClientProxy", serverSide = "trinsdar.nanochisel.CommonProxy")
+    @SidedProxy(clientSide = "trinsdar.powerchisels.ClientProxy", serverSide = "trinsdar.powerchisels.CommonProxy")
     public static CommonProxy proxy;
 
     @Mod.Instance
-    public static NanoChisel instance;
+    public static PowerChisels instance;
     public static Logger logger;
 
 

@@ -1,4 +1,4 @@
-package trinsdar.nanochisel;
+package trinsdar.powerchisels;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
@@ -38,14 +38,14 @@ import team.chisel.common.util.NBTUtil;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
+public class ItemElectricChisel extends Item implements IElectricItem, IChiselItem {
     public static String classic = "ic2-classic-spmod";
 
-    public ItemNanoChisel() {
+    public ItemElectricChisel() {
         super();
         setMaxStackSize(1);
-        setRegistryName("nanochisel");
-        setUnlocalizedName(NanoChisel.MODID + "." + "nanoChisel");
+        setRegistryName("powerchisels");
+        setUnlocalizedName(PowerChisels.MODID + "." + "nanoChisel");
         setCreativeTab(ChiselTabs.tab);
     }
 
@@ -55,7 +55,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
     }
 
 
-    public boolean isClassicLoaded(){
+    public static boolean isClassicLoaded(){
         if (Loader.isModLoaded(classic)){
             return true;
         }else {
@@ -64,7 +64,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
     }
 
     public double getCost(ItemStack stack){
-       return getMaxCharge(stack)/2500;
+       return getMaxCharge(stack)/500;
     }
 
     @Override
@@ -122,7 +122,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
         Multimap<String, AttributeModifier> multimap = HashMultimap.create();
         if (slot == EntityEquipmentSlot.MAINHAND) {
             if (ElectricItem.manager.getCharge(stack) >= getCost(stack)){
-                multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Chisel Damage", 4, 0));
+                multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Chisel Damage", 2, 0));
             }
         }
         return multimap;
@@ -130,12 +130,8 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-        if (isClassicLoaded()){
-            if (ElectricItem.manager.getCharge(stack) >= 100){
-                ElectricItem.manager.use(stack, 100, attacker);
-            }
-        }else {
-
+        if (ElectricItem.manager.getCharge(stack) >= getCost(stack)){
+            ElectricItem.manager.use(stack, getCost(stack), attacker);
         }
         return super.hitEntity(stack, attacker, target);
     }
@@ -187,41 +183,33 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public double getMaxCharge(ItemStack itemStack) {
-        if (isClassicLoaded()){
-            return 100000;
-        }else {
-            return 1000000;
-        }
+        return 10000;
 
     }
 
     @Override
     public int getTier(ItemStack itemStack) {
-        if (isClassicLoaded()){
-            return 2;
-        }else {
-            return 3;
-        }
+        return 1;
     }
 
     @Override
     public double getTransferLimit(ItemStack itemStack) {
-        if (isClassicLoaded()){
-            return 100;
-        }else {
-            return 1000;
-        }
+        return 100;
     }
 
-    public static final ItemNanoChisel nanoChisel = new ItemNanoChisel();
+    public static final ItemElectricChisel electricChisel = new ItemElectricChisel();
 
     @SubscribeEvent
     public static void registerItems(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();
-        registry.register(nanoChisel);
+        registry.register(electricChisel);
     }
     public static void initRecipe(){
-        Recipes.advRecipes.addRecipe(new ItemStack(nanoChisel), "  C", " C ", "E  ", 'C', IC2Items.getItem("crafting", "carbon_plate"), 'E', IC2Items.getItem("energy_crystal"));
+        if (isClassicLoaded()){
+            Recipes.advRecipes.addRecipe(new ItemStack(electricChisel), "  I", " C ", "B  ", 'I', "ingotRefinedIron", 'C', IC2Items.getItem("crafting", "circuit"), 'B', IC2Items.getItem("charging_re_battery"));
+        }else {
+            Recipes.advRecipes.addRecipe(new ItemStack(electricChisel), "I ", " S", 'I', "plateIron", 'S', IC2Items.getItem("crafting", "small_power_unit"));
+        }
     }
 
     public void initModel(){

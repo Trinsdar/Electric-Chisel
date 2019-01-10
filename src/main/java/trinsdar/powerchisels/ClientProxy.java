@@ -1,4 +1,4 @@
-package trinsdar.nanochisel;
+package trinsdar.powerchisels;
 
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -16,6 +16,6 @@ public class ClientProxy extends CommonProxy{
 
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
-        ItemNanoChisel.nanoChisel.initModel();
+        ItemElectricChisel.electricChisel.initModel();
     }
 }
