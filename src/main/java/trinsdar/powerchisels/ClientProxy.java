@@ -17,5 +17,6 @@ public class ClientProxy extends CommonProxy{
     @SubscribeEvent
     public static void registerModels(ModelRegistryEvent event) {
         ItemElectricChisel.electricChisel.initModel();
+        ItemFluxedChisel.fluxedChisel.initModel();
     }
 }
