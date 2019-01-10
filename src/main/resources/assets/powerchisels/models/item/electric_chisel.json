@@ -1,7 +1,6 @@
 {
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "nanochisel:items/nanochisel"
+		"layer0": "powerchisels:items/electric_chisel"
 	}
-	
 }

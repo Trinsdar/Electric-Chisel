@@ -49,7 +49,7 @@ repositories {
 
 dependencies {
     deobfProvided "net.industrial-craft:industrialcraft-2:${ic2_version}:api"
-    runtime "net.industrial-craft:industrialcraft-2:${ic2_version}"
+    //runtime "net.industrial-craft:industrialcraft-2:${ic2_version}"
     deobfProvided "team.chisel:Chisel:MC${mc_version}-${chisel_version}"
     runtime "team.chisel:Chisel:MC${mc_version}-${chisel_version}"
 }

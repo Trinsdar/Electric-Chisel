@@ -44,8 +44,8 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
     public ItemElectricChisel() {
         super();
         setMaxStackSize(1);
-        setRegistryName("powerchisels");
-        setUnlocalizedName(PowerChisels.MODID + "." + "nanoChisel");
+        setRegistryName("electric_chisel");
+        setUnlocalizedName(PowerChisels.MODID + "." + "electricChisel");
         setCreativeTab(ChiselTabs.tab);
     }
 
