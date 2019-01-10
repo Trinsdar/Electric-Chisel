@@ -55,7 +55,13 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
     }
 
 
-
+    public boolean isClassicLoaded(){
+        if (Loader.isModLoaded(classic)){
+            return true;
+        }else {
+            return false;
+        }
+    }
 
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
@@ -71,7 +77,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean showDurabilityBar(ItemStack stack) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             return true;
         }else {
             return ElectricItem.manager.getCharge(stack) != this.getMaxCharge(stack);
@@ -86,7 +92,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean canOpenGui(World world, EntityPlayer player, EnumHand hand) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 100;
         }else {
             return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 1000;
@@ -114,7 +120,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
     public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot slot, ItemStack stack) {
         Multimap<String, AttributeModifier> multimap = HashMultimap.create();
         if (slot == EntityEquipmentSlot.MAINHAND) {
-            if (Loader.isModLoaded(classic)){
+            if (isClassicLoaded()){
                 if (ElectricItem.manager.getCharge(stack) >= 100){
                     multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Chisel Damage", 4, 0));
                 }
@@ -129,7 +135,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             if (ElectricItem.manager.getCharge(stack) >= 100){
                 ElectricItem.manager.use(stack, 100, attacker);
             }
@@ -143,7 +149,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean canChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             return ElectricItem.manager.getCharge(chisel) >= 100;
         }else {
             return ElectricItem.manager.getCharge(chisel) >= 1000;
@@ -154,7 +160,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
     public ItemStack craftItem(ItemStack chisel, ItemStack source, ItemStack target, EntityPlayer player) {
         if (chisel.isEmpty()) return ItemStack.EMPTY;
         int toCraft = Math.min(source.getCount(), target.getMaxStackSize());
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             if (ElectricItem.manager.getCharge(chisel) >= 100) {
                 int damageLeft = ((int)this.getMaxCharge(chisel) - ((int)this.getMaxCharge(chisel) - (int)ElectricItem.manager.getCharge(chisel)))/100;
                 toCraft = Math.min(toCraft, damageLeft);
@@ -180,7 +186,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean canChiselBlock(World world, EntityPlayer player, EnumHand hand, BlockPos pos, IBlockState state) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 100;
         }else {
             return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 1000;
@@ -204,7 +210,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public double getMaxCharge(ItemStack itemStack) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             return 100000;
         }else {
             return 1000000;
@@ -214,7 +220,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public int getTier(ItemStack itemStack) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             return 2;
         }else {
             return 3;
@@ -223,7 +229,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public double getTransferLimit(ItemStack itemStack) {
-        if (Loader.isModLoaded(classic)){
+        if (isClassicLoaded()){
             return 100;
         }else {
             return 1000;
