@@ -114,6 +114,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
         list.add("");
         list.add(I18n.format(base + "modes"));
         list.add(I18n.format(base + "modes.selected", TextFormatting.GREEN + I18n.format(NBTUtil.getChiselMode(stack).getUnlocName() + ".name")));
+        list.add(I18n.format(base + "delete", TextFormatting.RED, TextFormatting.GRAY));
     }
 
     @Override
