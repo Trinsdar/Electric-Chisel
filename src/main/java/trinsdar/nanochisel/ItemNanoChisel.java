@@ -63,6 +63,10 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
         }
     }
 
+    public double getCost(ItemStack stack){
+       return getMaxCharge(stack)/2500;
+    }
+
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
         if (this.isInCreativeTab(tab)) {
@@ -92,11 +96,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean canOpenGui(World world, EntityPlayer player, EnumHand hand) {
-        if (isClassicLoaded()){
-            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 100;
-        }else {
-            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 1000;
-        }
+        return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= getCost(player.getHeldItem(hand));
     }
 
     @Override
@@ -120,14 +120,8 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
     public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot slot, ItemStack stack) {
         Multimap<String, AttributeModifier> multimap = HashMultimap.create();
         if (slot == EntityEquipmentSlot.MAINHAND) {
-            if (isClassicLoaded()){
-                if (ElectricItem.manager.getCharge(stack) >= 100){
-                    multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Chisel Damage", 4, 0));
-                }
-            }else {
-                if (ElectricItem.manager.getCharge(stack) >= 1000){
-                    multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Chisel Damage", 4, 0));
-                }
+            if (ElectricItem.manager.getCharge(stack) >= getCost(stack)){
+                multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Chisel Damage", 4, 0));
             }
         }
         return multimap;
@@ -140,38 +134,24 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
                 ElectricItem.manager.use(stack, 100, attacker);
             }
         }else {
-            if (ElectricItem.manager.getCharge(stack) >= 1000){
-                ElectricItem.manager.use(stack, 1000, attacker);
-            }
+
         }
         return super.hitEntity(stack, attacker, target);
     }
 
     @Override
     public boolean canChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
-        if (isClassicLoaded()){
-            return ElectricItem.manager.getCharge(chisel) >= 100;
-        }else {
-            return ElectricItem.manager.getCharge(chisel) >= 1000;
-        }
+        return ElectricItem.manager.getCharge(chisel) >= getCost(chisel);
     }
 
     @Override
     public ItemStack craftItem(ItemStack chisel, ItemStack source, ItemStack target, EntityPlayer player) {
         if (chisel.isEmpty()) return ItemStack.EMPTY;
         int toCraft = Math.min(source.getCount(), target.getMaxStackSize());
-        if (isClassicLoaded()){
-            if (ElectricItem.manager.getCharge(chisel) >= 100) {
-                int damageLeft = ((int)this.getMaxCharge(chisel) - ((int)this.getMaxCharge(chisel) - (int)ElectricItem.manager.getCharge(chisel)))/100;
-                toCraft = Math.min(toCraft, damageLeft);
-                ElectricItem.manager.use(chisel,toCraft*100, player);
-            }
-        }else {
-            if (ElectricItem.manager.getCharge(chisel) >= 1000) {
-                int damageLeft = ((int)this.getMaxCharge(chisel) - ((int)this.getMaxCharge(chisel) - (int)ElectricItem.manager.getCharge(chisel)))/1000;
-                toCraft = Math.min(toCraft, damageLeft);
-                ElectricItem.manager.use(chisel,toCraft*1000, player);
-            }
+        if (ElectricItem.manager.getCharge(chisel) >= getCost(chisel)) {
+            int damageLeft = ((int)this.getMaxCharge(chisel) - ((int)this.getMaxCharge(chisel) - (int)ElectricItem.manager.getCharge(chisel)))/(int)getCost(chisel);
+            toCraft = Math.min(toCraft, damageLeft);
+            ElectricItem.manager.use(chisel,toCraft*getCost(chisel), player);
         }
         ItemStack res = target.copy();
         source.shrink(toCraft);
@@ -186,11 +166,7 @@ public class ItemNanoChisel extends Item implements IElectricItem, IChiselItem {
 
     @Override
     public boolean canChiselBlock(World world, EntityPlayer player, EnumHand hand, BlockPos pos, IBlockState state) {
-        if (isClassicLoaded()){
-            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 100;
-        }else {
-            return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= 1000;
-        }
+        return ElectricItem.manager.getCharge(player.getHeldItem(hand)) >= getCost(player.getHeldItem(hand));
     }
 
     @Override
