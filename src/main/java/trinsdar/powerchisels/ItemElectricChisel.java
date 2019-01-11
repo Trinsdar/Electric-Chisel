@@ -64,7 +64,7 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
     }
 
     public double getCost(ItemStack stack){
-       return getMaxCharge(stack)/500;
+       return 20;
     }
 
     @Override

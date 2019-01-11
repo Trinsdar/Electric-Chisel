@@ -46,7 +46,7 @@ import java.util.List;
 
 public class ItemFluxedChisel extends Item implements IChiselItem {
 
-    public static final int MAX_ENERGY = 50000;
+    public static final int MAX_ENERGY = 40000;
 
     public ItemFluxedChisel() {
         super();
@@ -62,7 +62,7 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
     }
 
     public int getCost(){
-        return MAX_ENERGY/500;
+        return 80;
     }
 
     public boolean hasEnoughEnergy(ItemStack stack){
@@ -75,8 +75,8 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
         if (this.isInCreativeTab(tab)) {
             ItemStack empty = new ItemStack(this, 1, 0);
             ItemStack full = new ItemStack(this, 1, 0);
-            ElectricItem.manager.discharge(empty, 2.147483647E9D, 2147483647, true, false, false);
-            ElectricItem.manager.charge(full, 2.147483647E9D, 2147483647, true, false);
+            full.getCapability(CapabilityEnergy.ENERGY, null).extractEnergy(MAX_ENERGY, false);
+            full.getCapability(CapabilityEnergy.ENERGY, null).receiveEnergy(MAX_ENERGY, false);
             items.add(empty);
             items.add(full);
         }
