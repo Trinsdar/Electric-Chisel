@@ -12,7 +12,7 @@ public class PowerChisels {
     public static final String MODID = "powerchisels";
     public static final String MODNAME = "Power Chisels";
     public static final String MODVERSION = "@VERSION@";
-    public static final String DEPENDS = "required-after:ic2;required-after:chisel";
+    public static final String DEPENDS = "after:ic2;required-after:chisel";
     @SidedProxy(clientSide = "trinsdar.powerchisels.ClientProxy", serverSide = "trinsdar.powerchisels.CommonProxy")
     public static CommonProxy proxy;
 
