@@ -3,8 +3,6 @@ package trinsdar.powerchisels;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import ic2.api.item.ElectricItem;
-import ic2.api.item.IC2Items;
-import ic2.api.recipe.Recipes;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
@@ -17,16 +15,22 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistry;
 import team.chisel.api.IChiselGuiType;
@@ -36,10 +40,13 @@ import team.chisel.api.carving.IChiselMode;
 import team.chisel.common.init.ChiselTabs;
 import team.chisel.common.util.NBTUtil;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselItem {
+public class ItemFluxedChisel extends Item implements IChiselItem {
+
+    public static final int MAX_ENERGY = 50000;
 
     public ItemFluxedChisel() {
         super();
@@ -55,7 +62,12 @@ public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselIte
     }
 
     public int getCost(){
-        return getEnergyStored()/500;
+        return MAX_ENERGY/500;
+    }
+
+    public boolean hasEnoughEnergy(ItemStack stack){
+
+        return stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored() >= getCost();
     }
 
     @Override
@@ -78,7 +90,7 @@ public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselIte
     @Override
     public double getDurabilityForDisplay(ItemStack stack)
     {
-        return 1.0D - (double)getEnergyStored() / getMaxEnergyStored();
+        return 1.0D - (double)getEnergyStored(stack) / MAX_ENERGY;
     }
 
     @Override
@@ -88,7 +100,7 @@ public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselIte
 
     @Override
     public boolean canOpenGui(World world, EntityPlayer player, EnumHand hand) {
-        return getEnergyStored() >= getCost();
+        return hasEnoughEnergy(player.getHeldItem(hand));
     }
 
     @Override
@@ -107,13 +119,23 @@ public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselIte
         list.add(I18n.format(base + "modes"));
         list.add(I18n.format(base + "modes.selected", TextFormatting.GREEN + I18n.format(NBTUtil.getChiselMode(stack).getUnlocName() + ".name")));
         list.add(I18n.format(base + "delete", TextFormatting.RED, TextFormatting.GRAY));
+        if (stack.hasCapability(CapabilityEnergy.ENERGY, null))
+        {
+            IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
+            if (energyStorage != null)
+            {
+                double p = getDurabilityForDisplay(stack) * 100;
+                list.add("L: " + (int) p + "%");
+                list.add("E: " + energyStorage.getEnergyStored() + "/" + energyStorage.getMaxEnergyStored() + " FE");
+            }
+        }
     }
 
     @Override
     public Multimap<String, AttributeModifier> getAttributeModifiers(EntityEquipmentSlot slot, ItemStack stack) {
         Multimap<String, AttributeModifier> multimap = HashMultimap.create();
         if (slot == EntityEquipmentSlot.MAINHAND) {
-            if (getEnergyStored() >= getCost()){
+            if (hasEnoughEnergy(stack)){
                 multimap.put(SharedMonsterAttributes.ATTACK_DAMAGE.getName(), new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Chisel Damage", 2, 0));
             }
         }
@@ -122,25 +144,25 @@ public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselIte
 
     @Override
     public boolean hitEntity(ItemStack stack, EntityLivingBase target, EntityLivingBase attacker) {
-        if (getEnergyStored() >= getCost()){
-            extractEnergy(getCost(), false);
+        if (hasEnoughEnergy(stack)){
+            extractEnergy(stack, getCost(), false);
         }
         return super.hitEntity(stack, attacker, target);
     }
 
     @Override
     public boolean canChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
-        return getEnergyStored() >= getCost();
+        return hasEnoughEnergy(chisel);
     }
 
     @Override
     public ItemStack craftItem(ItemStack chisel, ItemStack source, ItemStack target, EntityPlayer player) {
         if (chisel.isEmpty()) return ItemStack.EMPTY;
         int toCraft = Math.min(source.getCount(), target.getMaxStackSize());
-        if (getEnergyStored() >= getCost()) {
-            int damageLeft = (getMaxEnergyStored() - (getMaxEnergyStored() - getEnergyStored()))/getCost();
+        if (hasEnoughEnergy(chisel)) {
+            int damageLeft = (MAX_ENERGY - (MAX_ENERGY - getEnergyStored(chisel)))/getCost();
             toCraft = Math.min(toCraft, damageLeft);
-            extractEnergy(toCraft*getCost(), false);
+            extractEnergy(chisel,toCraft*getCost(), false);
         }
         ItemStack res = target.copy();
         source.shrink(toCraft);
@@ -155,7 +177,7 @@ public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselIte
 
     @Override
     public boolean canChiselBlock(World world, EntityPlayer player, EnumHand hand, BlockPos pos, IBlockState state) {
-        return getEnergyStored() >= getCost();
+        return hasEnoughEnergy(player.getHeldItem(hand));
     }
 
     @Override
@@ -166,72 +188,53 @@ public class ItemFluxedChisel extends Item implements IEnergyStorage, IChiselIte
 
 
     /* IEnergyStorage */
-    public String ENERGY;
 
+    @Nullable
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        ItemStack container = new ItemStack(this);
-        if (container.getTagCompound() == null) {
-            setDefaultEnergyTag(container, 0);
-        }
-        int stored = Math.min(container.getTagCompound().getInteger(ENERGY), getMaxEnergyStored());
-        int receive = Math.min(maxReceive, Math.min(getMaxEnergyStored() - stored, 200));
+    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt)
+    {
+        return new ICapabilitySerializable<NBTBase>()
+        {
+            EnergyStorage buffer = new EnergyStorage(MAX_ENERGY);
 
-        if (!simulate) {
-            stored += receive;
-            container.getTagCompound().setInteger(ENERGY, stored);
-        }
-        return receive;
+            @Override
+            public NBTBase serializeNBT()
+            {
+                return CapabilityEnergy.ENERGY.writeNBT(buffer, null);
+            }
+
+            @Override
+            public void deserializeNBT(NBTBase nbt)
+            {
+                CapabilityEnergy.ENERGY.readNBT(buffer, null, nbt);
+            }
+
+            @Override
+            public boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing)
+            {
+                if (capability == CapabilityEnergy.ENERGY)
+                    return true;
+                return false;
+            }
+
+            @SuppressWarnings("unchecked")
+            @Nullable
+            @Override
+            public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing)
+            {
+                if (capability == CapabilityEnergy.ENERGY)
+                    return (T)buffer;
+                return null;
+            }
+        };
     }
 
-    @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        ItemStack container = new ItemStack(this);
-        if (container.getTagCompound() == null) {
-            setDefaultEnergyTag(container, 0);
-        }
-        int stored = Math.min(container.getTagCompound().getInteger(ENERGY), getMaxEnergyStored());
-        int extract = Math.min(maxExtract, stored);
-
-        if (!simulate) {
-            stored -= extract;
-            container.getTagCompound().setInteger(ENERGY, stored);
-        }
-        return extract;
+    public int extractEnergy(ItemStack chisel, int maxExtract, boolean simulate) {
+        return chisel.getCapability(CapabilityEnergy.ENERGY, null).extractEnergy(maxExtract, simulate);
     }
 
-    @Override
-    public int getEnergyStored() {
-        ItemStack container = new ItemStack(this);
-        if (container.getTagCompound() == null) {
-            setDefaultEnergyTag(container, 0);
-        }
-        return Math.min(container.getTagCompound().getInteger(ENERGY), getMaxEnergyStored());
-    }
-
-    @Override
-    public int getMaxEnergyStored() {
-        return 50000;
-    }
-
-    @Override
-    public boolean canExtract() {
-        return true;
-    }
-
-    @Override
-    public boolean canReceive() {
-        return true;
-    }
-
-    public static ItemStack setDefaultEnergyTag(ItemStack container, int energy) {
-
-        if (!container.hasTagCompound()) {
-            container.setTagCompound(new NBTTagCompound());
-        }
-        container.getTagCompound().setInteger("Energy", energy);
-
-        return container;
+    public int getEnergyStored(ItemStack stack) {
+        return stack.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored();
     }
 
 
