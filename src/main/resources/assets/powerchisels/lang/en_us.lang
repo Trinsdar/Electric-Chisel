@@ -1,3 +1,3 @@
 item.powerchisels.electricChisel.name=Electric Chisel
 item.powerchisels.fluxedChisel.name=Fluxed Chisel
-item.chisel.chisel.desc.delete=Note: If you do not get all your blocks chiseled when it runs out of energy don't be alarmed. The unchiseled ones are still in your chisel, just unacessable till the energy is high enough again.
+item.chisel.chisel.desc.energy=Energy

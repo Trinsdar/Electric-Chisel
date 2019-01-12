@@ -2,7 +2,6 @@ package trinsdar.powerchisels;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import ic2.api.item.ElectricItem;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.resources.I18n;
@@ -32,11 +31,9 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistry;
 import team.chisel.api.IChiselGuiType;
 import team.chisel.api.IChiselItem;
@@ -104,15 +101,6 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
         return slotChanged || !ItemStack.areItemsEqual(oldStack, newStack);
     }
 
-    @Override
-    public boolean canOpenGui(World world, EntityPlayer player, EnumHand hand) {
-        return hasEnoughEnergy(player.getHeldItem(hand));
-    }
-
-    @Override
-    public IChiselGuiType getGuiType(World world, EntityPlayer player, EnumHand hand) {
-        return IChiselGuiType.ChiselGuiType.NORMAL;
-    }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
@@ -124,15 +112,12 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
         list.add("");
         list.add(I18n.format(base + "modes"));
         list.add(I18n.format(base + "modes.selected", TextFormatting.GREEN + I18n.format(NBTUtil.getChiselMode(stack).getUnlocName() + ".name")));
-        list.add(I18n.format(base + "delete", TextFormatting.RED, TextFormatting.GRAY));
         if (stack.hasCapability(CapabilityEnergy.ENERGY, null))
         {
             IEnergyStorage energyStorage = stack.getCapability(CapabilityEnergy.ENERGY, null);
             if (energyStorage != null)
             {
-                double p = getDurabilityForDisplay(stack) * 100;
-                list.add("L: " + (int) p + "%");
-                list.add("E: " + energyStorage.getEnergyStored() + "/" + energyStorage.getMaxEnergyStored() + " FE");
+                list.add(I18n.format(base + "energy") + ": " + energyStorage.getEnergyStored() + "/" + energyStorage.getMaxEnergyStored() + " FE");
             }
         }
     }
@@ -156,6 +141,18 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
         return super.hitEntity(stack, attacker, target);
     }
 
+
+    /* IChiselItem */
+    @Override
+    public boolean canOpenGui(World world, EntityPlayer player, EnumHand hand) {
+        return hasEnoughEnergy(player.getHeldItem(hand));
+    }
+
+    @Override
+    public IChiselGuiType getGuiType(World world, EntityPlayer player, EnumHand hand) {
+        return IChiselGuiType.ChiselGuiType.NORMAL;
+    }
+
     @Override
     public boolean canChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
         return hasEnoughEnergy(chisel);
@@ -166,7 +163,7 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
         if (chisel.isEmpty()) return ItemStack.EMPTY;
         int toCraft = Math.min(source.getCount(), target.getMaxStackSize());
         if (hasEnoughEnergy(chisel)) {
-            int damageLeft = (MAX_ENERGY - (MAX_ENERGY - getEnergyStored(chisel)))/getCost();
+            int damageLeft = getEnergyStored(chisel)/getCost();
             toCraft = Math.min(toCraft, damageLeft);
             extractEnergy(chisel,toCraft*getCost(), false);
         }
@@ -194,7 +191,6 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
 
 
     /* IEnergyStorage */
-
     @Nullable
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable NBTTagCompound nbt)

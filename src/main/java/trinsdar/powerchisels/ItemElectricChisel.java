@@ -114,7 +114,6 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
         list.add("");
         list.add(I18n.format(base + "modes"));
         list.add(I18n.format(base + "modes.selected", TextFormatting.GREEN + I18n.format(NBTUtil.getChiselMode(stack).getUnlocName() + ".name")));
-        list.add(I18n.format(base + "delete", TextFormatting.RED, TextFormatting.GRAY));
     }
 
     @Override
@@ -137,6 +136,12 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
     }
 
     @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+        return slotChanged || !ItemStack.areItemsEqual(oldStack, newStack);
+    }
+
+    /* IChiselItem */
+    @Override
     public boolean canChisel(World world, EntityPlayer player, ItemStack chisel, ICarvingVariation target) {
         return ElectricItem.manager.getCharge(chisel) >= getCost(chisel);
     }
@@ -146,7 +151,7 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
         if (chisel.isEmpty()) return ItemStack.EMPTY;
         int toCraft = Math.min(source.getCount(), target.getMaxStackSize());
         if (ElectricItem.manager.getCharge(chisel) >= getCost(chisel)) {
-            int damageLeft = ((int)this.getMaxCharge(chisel) - ((int)this.getMaxCharge(chisel) - (int)ElectricItem.manager.getCharge(chisel)))/(int)getCost(chisel);
+            int damageLeft = (int)ElectricItem.manager.getCharge(chisel)/(int)getCost(chisel);
             toCraft = Math.min(toCraft, damageLeft);
             ElectricItem.manager.use(chisel,toCraft*getCost(chisel), player);
         }
@@ -171,10 +176,8 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
         return true;
     }
 
-    @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-        return slotChanged || !ItemStack.areItemsEqual(oldStack, newStack);
-    }
+
+    /* IElectricItem */
 
     @Override
     public boolean canProvideEnergy(ItemStack itemStack) {
@@ -196,6 +199,8 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
     public double getTransferLimit(ItemStack itemStack) {
         return 100;
     }
+
+    /* Registry */
 
     public static final ItemElectricChisel electricChisel = new ItemElectricChisel();
 
