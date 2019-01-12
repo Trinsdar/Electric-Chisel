@@ -20,6 +20,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
@@ -31,12 +32,17 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistry;
 import team.chisel.api.IChiselGuiType;
 import team.chisel.api.IChiselItem;
 import team.chisel.api.carving.ICarvingVariation;
 import team.chisel.api.carving.IChiselMode;
+import team.chisel.common.init.ChiselItems;
 import team.chisel.common.init.ChiselTabs;
 import team.chisel.common.util.NBTUtil;
 
@@ -248,7 +254,30 @@ public class ItemFluxedChisel extends Item implements IChiselItem {
         registry.register(fluxedChisel);
     }
     public static void initRecipe(){
-
+        ItemStack chisel = new ItemStack(fluxedChisel);
+        if (!Config.defaultFluxedChiselRecipeOverride){
+            if (!Loader.isModLoaded("enderio") && !Loader.isModLoaded("thermalexpansion")){
+                if (Config.defaultFluxedChiselRecipe){
+                    GameRegistry.addShapedRecipe(new ResourceLocation("fluxedChiselDefault"), null, chisel, "IC", "RI", 'I', "ingotIron", 'C', ChiselItems.chisel_iron, 'R', "blockRedstone");
+                }
+            }
+        }else if (Config.defaultFluxedChiselRecipeOverride){
+            if (Config.defaultFluxedChiselRecipe){
+                GameRegistry.addShapedRecipe(new ResourceLocation("fluxedChiselDefault"), null, chisel, "IC", "RI", 'I', "ingotIron", 'C', ChiselItems.chisel_iron, 'R', "blockRedstone");
+            }
+        }
+        if (Config.enderIOCompat){
+            if (Loader.isModLoaded("enderio")){
+                ItemStack capacitor = GameRegistry.makeItemStack("enderio:item_basic_capacitor", 0, 1, null);
+                GameRegistry.addShapedRecipe(new ResourceLocation("fluxedChiselEnderIO"), null, chisel, "Ic", "CI", 'I', "ingotConductiveIron", 'c', ChiselItems.chisel_iron, 'C', capacitor);
+            }
+        }
+        if (Config.thermalCompat){
+            if (Loader.isModLoaded("thermalexpansion")){
+                ItemStack toolcasing = GameRegistry.makeItemStack("thermalfoundation:material", 640, 1, null);
+                GameRegistry.addShapedRecipe(new ResourceLocation("fluxedChiselThermalExpansion"), null, chisel, "IC", "TI", 'I', "ingotSilver", 'C', ChiselItems.chisel_iron, 'T', toolcasing);
+            }
+        }
     }
 
     public void initModel(){

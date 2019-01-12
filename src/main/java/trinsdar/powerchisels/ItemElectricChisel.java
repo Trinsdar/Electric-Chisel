@@ -206,7 +206,7 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
     }
     public static void initRecipe(){
         if (isClassicLoaded()){
-            Recipes.advRecipes.addRecipe(new ItemStack(electricChisel), "  I", " C ", "B  ", 'I', "ingotRefinedIron", 'C', IC2Items.getItem("crafting", "circuit"), 'B', IC2Items.getItem("charging_re_battery"));
+            Recipes.advRecipes.addRecipe(new ItemStack(electricChisel), "  I", " C ", "B  ", 'I', "ingotRefinedIron", 'C', "circuitBasic", 'B', IC2Items.getItem("charging_re_battery"));
         }else {
             Recipes.advRecipes.addRecipe(new ItemStack(electricChisel), "I ", " S", 'I', "plateIron", 'S', IC2Items.getItem("crafting", "small_power_unit"));
         }
