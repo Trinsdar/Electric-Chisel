@@ -27,6 +27,8 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistry;
 import team.chisel.api.IChiselGuiType;
 import team.chisel.api.IChiselItem;
@@ -217,6 +219,7 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
         }
     }
 
+    @SideOnly(Side.CLIENT)
     public void initModel(){
         ModelLoader.setCustomModelResourceLocation(this, 0, new ModelResourceLocation(getRegistryName(), "inventory"));
     }
