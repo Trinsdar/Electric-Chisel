@@ -24,9 +24,8 @@ public class CommonProxy {
     public void init(FMLInitializationEvent event) {
         if (Loader.isModLoaded("ic2")){
             ItemElectricChisel.initRecipe();
-            ItemFluxedChisel.initRecipe();
         }
-
+        ItemFluxedChisel.initRecipe();
     }
 
     public void postInit(FMLPostInitializationEvent event){
