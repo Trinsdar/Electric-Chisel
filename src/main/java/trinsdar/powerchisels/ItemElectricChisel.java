@@ -107,6 +107,7 @@ public class ItemElectricChisel extends Item implements IElectricItem, IChiselIt
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack stack, @Nullable World world, List list, ITooltipFlag flag) {
         String base = "item.chisel.chisel.desc.";
