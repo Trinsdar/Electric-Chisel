@@ -1,8 +1,8 @@
 [
 {
-  "modid": "nanochisel",
-  "name": "Nano Chisel",
-  "description": "Adds a chisel that uses eu.",
+  "modid": "powerchisels",
+  "name": "Power Chisels",
+  "description": "Adds a chisel that uses eu and a chisel that uses fe.",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "",
